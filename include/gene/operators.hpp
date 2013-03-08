@@ -106,16 +106,17 @@ namespace tree {
             return op(static_cast<opset>(dst(gene::config::random_engine)));
         }
 
-        struct arity : boost::static_visitor<std::size_t>{
-            template<class Operator>
-            std::size_t operator()(Operator const&) const
-            {
-                return Operator::arity;
-            }
-        };
 
         template<class V>
         class op_container{
+        private:
+            struct arity : boost::static_visitor<std::size_t>{
+                template<class Operator>
+                std::size_t operator()(Operator const&) const
+                {
+                    return Operator::arity;
+                }
+            };
         public:
             typedef
                 boost::variant<plus, minus, mult, divide, abs, sqrt>
@@ -131,7 +132,7 @@ namespace tree {
                 : op(op_), children(boost::apply_visitor(arity(), op_))
             {
             }
-            
+
         };
     } // namespace operators
 
