@@ -117,6 +117,7 @@ namespace tree {
                     return Operator::arity;
                 }
             };
+
         public:
             typedef
                 boost::variant<plus, minus, mult, divide, abs, sqrt>
@@ -124,17 +125,29 @@ namespace tree {
             typedef
                 std::vector<std::shared_ptr<node<V>>>
                 children_type;
+
         private:
             operator_type const op;
             children_type children;
             std::size_t const arity;
+
         public:
             op_container(operator_type op_)
-                : op(op_), arity(boost::apply_visitor(get_arity(), op_)), children(arity)
-            {
-            }
+                : op(op_), arity(boost::apply_visitor(get_arity(), op_)), children()
+            {}
 
+            template<class... Args>
+            void set_children(Args... children_ptrs)
+            {
+                if(sizeof...(Args) != arity){
+                    throw("number of children is invalid");
+                }
+                for(auto child_ptr : {children_ptrs...}){
+                    children.push_back(child_ptr);
+                }
+            }
         };
+
     } // namespace operators
 
 } // namespace tree
