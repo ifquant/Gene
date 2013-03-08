@@ -24,7 +24,7 @@ namespace tree {
             static constexpr std::size_t arity = 2;
 
             template<class T>
-            T operator()(T a, T b)
+            T operator()(T const a, T const b) const
             {
                 return a + b;
             }
@@ -34,7 +34,7 @@ namespace tree {
             static constexpr std::size_t arity = 2;
 
             template<class T>
-            T operator()(T a, T b)
+            T operator()(T const a, T const b) const
             {
                 return a - b;
             }
@@ -44,7 +44,7 @@ namespace tree {
             static constexpr std::size_t arity = 2;
 
             template<class T>
-            T operator()(T a, T b)
+            T operator()(T const a, T const b) const
             {
                 return a * b;
             }
@@ -54,7 +54,7 @@ namespace tree {
             static constexpr std::size_t arity = 2;
 
             template<class T>
-            T operator()(T a, T b)
+            T operator()(T const a, T const b) const
             {
                 return a / b;
             }
@@ -64,7 +64,7 @@ namespace tree {
             static constexpr std::size_t arity = 1;
 
             template<class T>
-            T operator()(T a)
+            T operator()(T const a) const
             {
                 return std::abs(a);
             }
@@ -74,7 +74,7 @@ namespace tree {
             static constexpr std::size_t arity = 1;
 
             template<class T>
-            T operator()(T a)
+            T operator()(T const a) const
             {
                 return std::sqrt(a);
             }
@@ -85,7 +85,7 @@ namespace tree {
         };
 
         boost::variant<plus, minus, mult, divide, abs, sqrt>
-        op(opset sym)
+        op(opset const sym)
         {
             switch(sym){
             case opset::plus: return plus();
@@ -110,7 +110,7 @@ namespace tree {
         template<class V>
         class op_container{
         private:
-            struct arity : boost::static_visitor<std::size_t>{
+            struct get_arity : boost::static_visitor<std::size_t>{
                 template<class Operator>
                 std::size_t operator()(Operator const&) const
                 {
@@ -125,11 +125,12 @@ namespace tree {
                 std::vector<std::shared_ptr<node<V>>>
                 children_type;
         private:
-            operator_type op;
+            operator_type const op;
             children_type children;
+            std::size_t const arity;
         public:
             op_container(operator_type op_)
-                : op(op_), children(boost::apply_visitor(arity(), op_))
+                : op(op_), arity(boost::apply_visitor(get_arity(), op_)), children(arity)
             {
             }
 
