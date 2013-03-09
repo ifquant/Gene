@@ -1,6 +1,8 @@
 #if !defined GENE_NODE_HPP_INCLUDED
 #define      GENE_NODE_HPP_INCLUDED
 
+#include "operators.hpp"
+
 #include <memory>
 #include <vector>
 
@@ -10,9 +12,57 @@ namespace gene {
 
 namespace tree {
 
+    template<class V>
+    class op_container;
+
     template<class Val>
-    class node{
+    using node = boost::variant<Val, op_container<Val>>;
+    
+    template<class V>
+    class op_container{
     private:
+        struct get_arity : boost::static_visitor<std::size_t>{
+            template<class Operator>
+            std::size_t operator()(Operator const&) const
+            {
+                return Operator::arity;
+            }
+        };
+
+    public:
+        typedef
+            boost::variant< operators::plus,
+                            operators::minus,
+                            operators::mult,
+                            operators::divide,
+                            operators::abs,
+                            operators::sqrt >
+            operator_type;
+        typedef
+            std::vector<std::shared_ptr<node<V>>>
+            children_type;
+
+    public:
+        operator_type const op;
+        children_type children;
+        std::size_t const arity;
+
+    public:
+        op_container(operator_type op_)
+            : op(op_), arity(boost::apply_visitor(get_arity(), op_)), children()
+        {}
+
+        template<class... Args>
+        void set_children(Args... children_ptrs)
+        {
+            if(sizeof...(Args) != arity){
+                throw("number of children is invalid");
+            }
+            for(auto child_ptr : {children_ptrs...}){
+                children.push_back(child_ptr);
+            }
+        }
+
     };
 
 } // namespace tree
