@@ -17,7 +17,7 @@ namespace tree {
 
     template<class Val>
     using node = boost::variant<Val, op_container<Val>>;
-    
+
     template<class V>
     class op_container{
     private:
@@ -31,12 +31,7 @@ namespace tree {
 
     public:
         typedef
-            boost::variant< operators::plus,
-                            operators::minus,
-                            operators::mult,
-                            operators::divide,
-                            operators::abs,
-                            operators::sqrt >
+            typename operators::operator_type
             operator_type;
         typedef
             std::vector<std::shared_ptr<node<V>>>

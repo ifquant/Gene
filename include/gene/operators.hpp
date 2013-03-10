@@ -4,6 +4,7 @@
 #include "config.hpp"
 
 #include <vector>
+#include <string>
 #include <memory>
 #include <random>
 
@@ -19,6 +20,7 @@ namespace gene {
 namespace tree {
 
     namespace operators {
+
         struct plus{
             static constexpr std::size_t arity = 2;
 
@@ -26,6 +28,14 @@ namespace tree {
             T operator()(T const a, T const b) const
             {
                 return a + b;
+            }
+
+            std::string to_string(std::vector<std::string> const& children_strs)
+            {
+                if(children_strs.size()!=arity){
+                    throw("plus::to_string: children size is invalid");
+                }
+                return children_strs[0] + " + " + children_strs[1];
             }
         };
 
@@ -37,6 +47,14 @@ namespace tree {
             {
                 return a - b;
             }
+
+            std::string to_string(std::vector<std::string> const& children_strs)
+            {
+                if(children_strs.size()!=arity){
+                    throw("plus::to_string: children size is invalid");
+                }
+                return children_strs[0] + " - " + children_strs[1];
+            }
         };
 
         struct mult{
@@ -46,6 +64,14 @@ namespace tree {
             T operator()(T const a, T const b) const
             {
                 return a * b;
+            }
+
+            std::string to_string(std::vector<std::string> const& children_strs)
+            {
+                if(children_strs.size()!=arity){
+                    throw("plus::to_string: children size is invalid");
+                }
+                return children_strs[0] + " * " + children_strs[1];
             }
         };
 
@@ -57,6 +83,14 @@ namespace tree {
             {
                 return a / b;
             }
+
+            std::string to_string(std::vector<std::string> const& children_strs)
+            {
+                if(children_strs.size()!=arity){
+                    throw("plus::to_string: children size is invalid");
+                }
+                return children_strs[0] + " / " + children_strs[1];
+            }
         };
 
         struct abs{
@@ -67,6 +101,14 @@ namespace tree {
             {
                 return std::abs(a);
             }
+
+            std::string to_string(std::vector<std::string> const& children_strs)
+            {
+                if(children_strs.size()!=arity){
+                    throw("plus::to_string: children size is invalid");
+                }
+                return "abs( " + children_strs[0] + " )";
+            }
         };
 
         struct sqrt{
@@ -76,6 +118,14 @@ namespace tree {
             T operator()(T const a) const
             {
                 return std::sqrt(a);
+            }
+
+            std::string to_string(std::vector<std::string> const& children_strs)
+            {
+                if(children_strs.size()!=arity){
+                    throw("plus::to_string: children size is invalid");
+                }
+                return "sqrt( " + children_strs[0] + " )";
             }
         };
 
@@ -105,6 +155,14 @@ namespace tree {
             return op(static_cast<opset>(dst(gene::config::random_engine)));
         }
 
+        typedef
+            boost::variant< operators::plus,
+                            operators::minus,
+                            operators::mult,
+                            operators::divide,
+                            operators::abs,
+                            operators::sqrt >
+            operator_type;
 
     } // namespace operators
 
