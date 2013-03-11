@@ -5,6 +5,7 @@
 #include "gene/util.hpp"
 #include "gene/node.hpp"
 #include "gene/operators.hpp"
+#include "gene/random_term.hpp"
 #include "gene/tree.hpp"
 
 #endif    // GENE_GENE_HPP_INCLUDED
