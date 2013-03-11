@@ -18,6 +18,7 @@ namespace random_term {
     public:
         static Term generate_term()
         {
+            // TODO
             return Term();
         }
     };
@@ -27,6 +28,7 @@ namespace random_term {
     public:
         static std::string generate_term()
         {
+            // TODO
             return "";
         }
     };
