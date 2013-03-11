@@ -12,13 +12,33 @@ namespace random_term {
     class default_random_term;
 
     template<class Term>
-    class default_random_term< Term,
-                               typename std::enable_if<std::is_arithmetic<Term>::value>::type
-                             > {
+    class default_random_term<
+                Term,
+                typename std::enable_if<
+                        std::is_arithmetic<Term>::value &&
+                        std::is_signed<Term>::value
+                >::type
+          > {
     public:
         static Term generate_term()
         {
-            // TODO
+            // TODO signed or floating point
+            return Term();
+        }
+    };
+
+    template<class Term>
+    class default_random_term<
+                Term,
+                typename std::enable_if<
+                        std::is_integral<Term>::value &&
+                        std::is_unsigned<Term>::value
+                >::type
+          > {
+    public:
+        static Term generate_term()
+        {
+            // TODO unsigned
             return Term();
         }
     };
@@ -28,7 +48,7 @@ namespace random_term {
     public:
         static std::string generate_term()
         {
-            // TODO
+            // TODO string
             return "";
         }
     };
