@@ -110,11 +110,11 @@ namespace tree {
 
     namespace impl {
 
-        template<class Val>
+        template<class Val, class Generator>
         std::shared_ptr<node<Val>> generate_random_impl(int const max_depth, int const depth)
         {
             if(depth==max_depth){
-                return std::make_shared<node<Val>>(Val());
+                return std::make_shared<node<Val>>(Generator::generate_term());
             }
 
             std::bernoulli_distribution has_operator(0.50);
@@ -122,12 +122,12 @@ namespace tree {
                 op_container<Val> container(operators::random_op());
                 typename op_container<Val>::children_type children_;
                 for(std::size_t i=0; i < container.arity; ++i){
-                    children_.push_back(generate_random_impl<Val>(max_depth, depth+1));
+                    children_.push_back(generate_random_impl<Val, Generator>(max_depth, depth+1));
                 }
                 container.children = children_;
                 return std::make_shared<node<Val>>(container);
             }else{
-                return std::make_shared<node<Val>>(Val());
+                return std::make_shared<node<Val>>(Generator::generate_term());
             }
         }
 
@@ -136,7 +136,7 @@ namespace tree {
     template<class Val, class RandomTermGenerator = random_term::default_random_term<Val>>
     inline tree<Val, RandomTermGenerator> generate_random(int const max_depth)
     {
-        return {impl::generate_random_impl<Val>(max_depth, 0)};
+        return {impl::generate_random_impl<Val, RandomTermGenerator>(max_depth, 0)};
     }
 
 

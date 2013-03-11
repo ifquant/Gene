@@ -14,7 +14,8 @@ namespace random_term {
     template<class Term>
     class default_random_term< Term,
                                typename std::enable_if<std::is_arithmetic<Term>::value>::type
-                             >{
+                             > {
+    public:
         static Term generate_term()
         {
             return Term();
@@ -23,7 +24,7 @@ namespace random_term {
 
     template<>
     class default_random_term<std::string>{
-
+    public:
         static std::string generate_term()
         {
             return "";
