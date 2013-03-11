@@ -117,7 +117,8 @@ namespace tree {
                 return std::make_shared<node<Val>>(Generator::generate_term());
             }
 
-            std::bernoulli_distribution has_operator(0.50);
+            double const probability_to_make_operator = (max_depth - 1.0) / max_depth;
+            std::bernoulli_distribution has_operator(probability_to_make_operator);
             if(has_operator(config::random_engine)){
                 op_container<Val> container(operators::random_op());
                 typename op_container<Val>::children_type children_;
