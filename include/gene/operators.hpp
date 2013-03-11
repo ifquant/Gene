@@ -30,7 +30,7 @@ namespace tree {
                 return a + b;
             }
 
-            std::string to_string(std::vector<std::string> const& children_strs)
+            std::string to_string(std::vector<std::string> const& children_strs) const
             {
                 if(children_strs.size()!=arity){
                     throw("plus::to_string: children size is invalid");
@@ -48,7 +48,7 @@ namespace tree {
                 return a - b;
             }
 
-            std::string to_string(std::vector<std::string> const& children_strs)
+            std::string to_string(std::vector<std::string> const& children_strs) const
             {
                 if(children_strs.size()!=arity){
                     throw("plus::to_string: children size is invalid");
@@ -66,7 +66,7 @@ namespace tree {
                 return a * b;
             }
 
-            std::string to_string(std::vector<std::string> const& children_strs)
+            std::string to_string(std::vector<std::string> const& children_strs) const
             {
                 if(children_strs.size()!=arity){
                     throw("plus::to_string: children size is invalid");
@@ -84,7 +84,7 @@ namespace tree {
                 return a / b;
             }
 
-            std::string to_string(std::vector<std::string> const& children_strs)
+            std::string to_string(std::vector<std::string> const& children_strs) const
             {
                 if(children_strs.size()!=arity){
                     throw("plus::to_string: children size is invalid");
@@ -102,7 +102,7 @@ namespace tree {
                 return std::abs(a);
             }
 
-            std::string to_string(std::vector<std::string> const& children_strs)
+            std::string to_string(std::vector<std::string> const& children_strs) const
             {
                 if(children_strs.size()!=arity){
                     throw("plus::to_string: children size is invalid");
@@ -120,7 +120,7 @@ namespace tree {
                 return std::sqrt(a);
             }
 
-            std::string to_string(std::vector<std::string> const& children_strs)
+            std::string to_string(std::vector<std::string> const& children_strs) const
             {
                 if(children_strs.size()!=arity){
                     throw("plus::to_string: children size is invalid");

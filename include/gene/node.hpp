@@ -39,8 +39,8 @@ namespace tree {
 
     public:
         operator_type const op;
-        children_type children;
         std::size_t const arity;
+        children_type children;
 
     public:
         op_container(operator_type op_)
