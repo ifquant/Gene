@@ -35,9 +35,12 @@ namespace tree {
                 if(children_strs.size()!=arity){
                     throw("plus::to_string: children size is invalid");
                 }
-                return children_strs[0] + " + " + children_strs[1];
+                return "( " + children_strs[0] + " + " + children_strs[1] + " )";
             }
+
+            static char const symbol[];
         };
+        char const plus::symbol[] = "plus";
 
         struct minus{
             static constexpr std::size_t arity = 2;
@@ -53,9 +56,12 @@ namespace tree {
                 if(children_strs.size()!=arity){
                     throw("plus::to_string: children size is invalid");
                 }
-                return children_strs[0] + " - " + children_strs[1];
+                return "( " + children_strs[0] + " - " + children_strs[1] + " )";
             }
+
+            static char const symbol[];
         };
+        char const minus::symbol[] = "minus";
 
         struct mult{
             static constexpr std::size_t arity = 2;
@@ -71,9 +77,12 @@ namespace tree {
                 if(children_strs.size()!=arity){
                     throw("plus::to_string: children size is invalid");
                 }
-                return children_strs[0] + " * " + children_strs[1];
+                return "( " + children_strs[0] + " * " + children_strs[1] + " )";
             }
+
+            static char const symbol[];
         };
+        char const mult::symbol[] = "mult";
 
         struct divide{
             static constexpr std::size_t arity = 2;
@@ -89,9 +98,12 @@ namespace tree {
                 if(children_strs.size()!=arity){
                     throw("plus::to_string: children size is invalid");
                 }
-                return children_strs[0] + " / " + children_strs[1];
+                return "( " + children_strs[0] + " / " + children_strs[1] + " )";
             }
+
+            static char const symbol[];
         };
+        char const divide::symbol[] = "div";
 
         struct abs{
             static constexpr std::size_t arity = 1;
@@ -109,7 +121,10 @@ namespace tree {
                 }
                 return "abs( " + children_strs[0] + " )";
             }
+
+            static char const symbol[];
         };
+        char const abs::symbol[] = "abs";
 
         struct sqrt{
             static constexpr std::size_t arity = 1;
@@ -127,7 +142,10 @@ namespace tree {
                 }
                 return "sqrt( " + children_strs[0] + " )";
             }
+
+            static char const symbol[];
         };
+        char const sqrt::symbol[] = "sqrt";
 
         enum struct opset{
             plus, minus, mult, div, abs, sqrt
