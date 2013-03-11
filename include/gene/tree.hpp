@@ -4,6 +4,7 @@
 #include "config.hpp"
 #include "node.hpp"
 #include "operators.hpp"
+#include "random_term.hpp"
 
 #include <string>
 #include <vector>
@@ -20,7 +21,7 @@ namespace gene {
 
 namespace tree {
 
-    template<class Val>
+    template<class Val, class RandomTermGenerator = random_term::default_random_term<Val>>
     class tree{
     public:
         typedef std::shared_ptr<node<Val>> node_ptr_type;
@@ -75,7 +76,7 @@ namespace tree {
         std::string to_string_impl(node_ptr_type const node_ptr, int const level) const
         {
             if(node_ptr->which() == 0){
-                return indent(level) + "terminal: "
+                return indent(level) + "term: "
                     + boost::lexical_cast<std::string>(boost::get<Val>(*node_ptr)) + '\n';
             } else if(node_ptr->which() == 1){
                 auto const& container = boost::get<op_container<Val>>(*node_ptr);
@@ -83,8 +84,7 @@ namespace tree {
                 return std::accumulate( container.children.begin(),
                                         container.children.end(),
                                         retval,
-                                        [&](std::string acc, std::shared_ptr<node<Val>> n)
-                                        {
+                                        [&](std::string acc, std::shared_ptr<node<Val>> n) {
                                             return acc + this->to_string_impl(n, level+1) + '\n';
                                         }
                                       );
@@ -133,8 +133,8 @@ namespace tree {
 
     } // namespace impl
 
-    template<class Val>
-    inline tree<Val> generate_random(int const max_depth)
+    template<class Val, class RandomTermGenerator = random_term::default_random_term<Val>>
+    inline tree<Val, RandomTermGenerator> generate_random(int const max_depth)
     {
         return {impl::generate_random_impl<Val>(max_depth, 0)};
     }
