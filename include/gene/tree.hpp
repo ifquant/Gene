@@ -48,13 +48,13 @@ namespace tree {
                 return boost::lexical_cast<std::string>(boost::get<Val>(*node_ptr));
             } else if(node_ptr->which() == 1){
                 // node has operator
-                auto const& container = boost::get<knot<Val>>(*node_ptr);
-                std::vector<std::string> arg_strs(container.children.size());
-                std::transform(container.children.begin(), container.children.end(), arg_strs.begin(),
+                auto const& knot_node = boost::get<knot<Val>>(*node_ptr);
+                std::vector<std::string> arg_strs(knot_node.children.size());
+                std::transform(knot_node.children.begin(), knot_node.children.end(), arg_strs.begin(),
                         [&](std::shared_ptr<node<Val>> n) {
                             return this->expression_impl(n);
                         });
-                return boost::apply_visitor(operator_to_string(arg_strs), container.op);
+                return boost::apply_visitor(operator_to_string(arg_strs), knot_node.op);
             } else {
                 throw("gene::tree::expression_impl: invalid node value.");
             }
@@ -79,10 +79,10 @@ namespace tree {
                 return indent(level) + "term: "
                     + boost::lexical_cast<std::string>(boost::get<Val>(*node_ptr)) + '\n';
             } else if(node_ptr->which() == 1){
-                auto const& container = boost::get<knot<Val>>(*node_ptr);
-                std::string retval = indent(level) + boost::apply_visitor(operator_symbol(), container.op) + ":\n";
-                return std::accumulate( container.children.begin(),
-                                        container.children.end(),
+                auto const& knot_node = boost::get<knot<Val>>(*node_ptr);
+                std::string retval = indent(level) + boost::apply_visitor(operator_symbol(), knot_node.op) + ":\n";
+                return std::accumulate( knot_node.children.begin(),
+                                        knot_node.children.end(),
                                         retval,
                                         [&](std::string acc, std::shared_ptr<node<Val>> n) {
                                             return acc + this->to_string_impl(n, level+1) + '\n';
@@ -120,13 +120,13 @@ namespace tree {
             double const probability_to_make_operator = (max_depth - 1.0) / max_depth;
             std::bernoulli_distribution has_operator(probability_to_make_operator);
             if(has_operator(config::random_engine)){
-                knot<Val> container(operators::random_op());
+                knot<Val> knot_node(operators::random_op());
                 typename knot<Val>::children_type children_;
-                for(std::size_t i=0; i < container.arity; ++i){
+                for(std::size_t i=0; i < knot_node.arity; ++i){
                     children_.push_back(generate_random_impl<Val, Generator>(max_depth, depth+1));
                 }
-                container.children = children_;
-                return std::make_shared<node<Val>>(container);
+                knot_node.children = children_;
+                return std::make_shared<node<Val>>(knot_node);
             }else{
                 return std::make_shared<node<Val>>(Generator::generate_term());
             }
