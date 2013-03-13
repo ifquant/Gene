@@ -48,7 +48,7 @@ namespace tree {
                 return boost::lexical_cast<std::string>(boost::get<Val>(*node_ptr));
             } else if(node_ptr->which() == 1){
                 // node has operator
-                auto const& container = boost::get<op_container<Val>>(*node_ptr);
+                auto const& container = boost::get<knot<Val>>(*node_ptr);
                 std::vector<std::string> arg_strs(container.children.size());
                 std::transform(container.children.begin(), container.children.end(), arg_strs.begin(),
                         [&](std::shared_ptr<node<Val>> n) {
@@ -79,7 +79,7 @@ namespace tree {
                 return indent(level) + "term: "
                     + boost::lexical_cast<std::string>(boost::get<Val>(*node_ptr)) + '\n';
             } else if(node_ptr->which() == 1){
-                auto const& container = boost::get<op_container<Val>>(*node_ptr);
+                auto const& container = boost::get<knot<Val>>(*node_ptr);
                 std::string retval = indent(level) + boost::apply_visitor(operator_symbol(), container.op) + ":\n";
                 return std::accumulate( container.children.begin(),
                                         container.children.end(),
@@ -120,8 +120,8 @@ namespace tree {
             double const probability_to_make_operator = (max_depth - 1.0) / max_depth;
             std::bernoulli_distribution has_operator(probability_to_make_operator);
             if(has_operator(config::random_engine)){
-                op_container<Val> container(operators::random_op());
-                typename op_container<Val>::children_type children_;
+                knot<Val> container(operators::random_op());
+                typename knot<Val>::children_type children_;
                 for(std::size_t i=0; i < container.arity; ++i){
                     children_.push_back(generate_random_impl<Val, Generator>(max_depth, depth+1));
                 }

@@ -13,13 +13,13 @@ namespace gene {
 namespace tree {
 
     template<class V>
-    class op_container;
+    class knot;
 
     template<class Val>
-    using node = boost::variant<Val, op_container<Val>>;
+    using node = boost::variant<Val, knot<Val>>;
 
     template<class V>
-    class op_container{
+    class knot{
     private:
         struct get_arity : boost::static_visitor<std::size_t>{
             template<class Operator>
@@ -43,7 +43,7 @@ namespace tree {
         children_type children;
 
     public:
-        op_container(operator_type op_)
+        knot(operator_type op_)
             : op(op_), arity(boost::apply_visitor(get_arity(), op_)), children()
         {}
 
