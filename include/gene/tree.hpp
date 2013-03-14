@@ -29,7 +29,6 @@ namespace tree {
 
     private:
         std::shared_ptr<node<Val>> root;
-        double fitness;
 
     private:
         struct operator_to_string : boost::static_visitor<std::string>{
@@ -145,8 +144,8 @@ namespace tree {
         }
 
     public:
-        tree() : root(nullptr), fitness(0.0) {}
-        tree(node_ptr_type p) : root(p), fitness(0.0) {}
+        tree() : root(nullptr) {}
+        tree(node_ptr_type p) : root(p) {}
 
         std::string expression() const
         {
