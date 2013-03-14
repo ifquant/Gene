@@ -168,7 +168,7 @@ namespace tree {
     namespace impl {
 
         template<class Val, std::size_t InputSize, class Generator>
-        std::shared_ptr<node<Val>> generate_random_impl(int const max_depth, int const depth)
+        std::shared_ptr<node<Val>> generate_random_impl(std::size_t const max_depth, std::size_t const depth)
         {
             if(depth==max_depth){
                 return std::make_shared<node<Val>>(Generator::generate_term());
@@ -198,7 +198,7 @@ namespace tree {
     } // namespace impl
 
     template<class Val, std::size_t InputSize, class RandomTermGenerator = random_term::default_random_term<Val>>
-    inline tree<Val, RandomTermGenerator> generate_random(int const max_depth)
+    inline tree<Val, RandomTermGenerator> generate_random(std::size_t const max_depth)
     {
         return {impl::generate_random_impl<Val, InputSize, RandomTermGenerator>(max_depth, 0)};
     }
