@@ -13,7 +13,9 @@
 namespace gene {
 namespace individual {
 
-    template<class Value, std::size_t OutputSize, class RandomTermGenerator = random_term::default_random_term<Value>>
+    template< class Value,
+              std::size_t OutputSize,
+              class RandomTermGenerator = random_term::default_random_term<Value> >
     class individual{
     public:
         typedef tree::tree<Value, RandomTermGenerator> tree_type;
@@ -51,7 +53,10 @@ namespace individual {
         // std::string calc_fitness() const
     };
 
-    template<class Value, std::size_t InputSize, std::size_t OutputSize, class RandomTermGenerator = random_term::default_random_term<Value>>
+    template< class Value,
+              std::size_t InputSize,
+              std::size_t OutputSize,
+              class RandomTermGenerator = random_term::default_random_term<Value> >
     inline individual<Value, OutputSize, RandomTermGenerator> generate_random()
     {
         std::array<tree::tree<Value, RandomTermGenerator>, OutputSize> trees;
