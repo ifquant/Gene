@@ -5,6 +5,7 @@
 
 #include <memory>
 #include <vector>
+#include <cstddef>
 
 #include <boost/variant.hpp>
 
@@ -12,11 +13,17 @@ namespace gene {
 
 namespace tree {
 
+    typedef std::size_t Variable;
+    std::string variable_name(Variable v)
+    {
+        return "x" + std::to_string(v);
+    }
+
     template<class V>
     class knot;
 
     template<class Val>
-    using node = boost::variant<Val, knot<Val>>;
+    using node = boost::variant<Val, knot<Val>, Variable>;
 
     template<class V>
     class knot{

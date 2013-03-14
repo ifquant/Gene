@@ -44,10 +44,10 @@ namespace tree {
         std::string expression_impl(node_ptr_type const node_ptr) const
         {
             if(node_ptr->which() == 0){
-                // node has terminal value
+                // when node has terminal value
                 return boost::lexical_cast<std::string>(boost::get<Val>(*node_ptr));
             } else if(node_ptr->which() == 1){
-                // node has operator
+                // when node has operator
                 auto const& knot_node = boost::get<knot<Val>>(*node_ptr);
                 std::vector<std::string> arg_strs(knot_node.children.size());
                 std::transform(knot_node.children.begin(), knot_node.children.end(), arg_strs.begin(),
@@ -55,6 +55,9 @@ namespace tree {
                             return this->expression_impl(n);
                         });
                 return boost::apply_visitor(operator_to_string(arg_strs), knot_node.op);
+            }else if(node_ptr->which() == 2){
+                // when node has variable terminal
+                return variable_name(boost::get<Variable>(*node_ptr));
             } else {
                 throw("gene::tree::expression_impl: invalid node value.");
             }
@@ -76,7 +79,7 @@ namespace tree {
         std::string to_string_impl(node_ptr_type const node_ptr, int const level) const
         {
             if(node_ptr->which() == 0){
-                return indent(level) + "term: "
+                return indent(level) + "const: "
                     + boost::lexical_cast<std::string>(boost::get<Val>(*node_ptr)) + '\n';
             } else if(node_ptr->which() == 1){
                 auto const& knot_node = boost::get<knot<Val>>(*node_ptr);
@@ -88,7 +91,10 @@ namespace tree {
                                             return acc + this->to_string_impl(n, level+1) + '\n';
                                         }
                                       );
-            } else {
+            }else if(node_ptr->which() == 2){
+                return indent(level) + "var: "
+                    + variable_name(boost::get<Variable>(*node_ptr));
+            }else {
                 throw("gene::tree::to_string_impl: invalid node value.");
             }
         }
@@ -110,7 +116,7 @@ namespace tree {
 
     namespace impl {
 
-        template<class Val, class Generator>
+        template<class Val, std::size_t InputSize, class Generator>
         std::shared_ptr<node<Val>> generate_random_impl(int const max_depth, int const depth)
         {
             if(depth==max_depth){
@@ -123,21 +129,27 @@ namespace tree {
                 knot<Val> knot_node(operators::random_op());
                 typename knot<Val>::children_type children_;
                 for(std::size_t i=0; i < knot_node.arity; ++i){
-                    children_.push_back(generate_random_impl<Val, Generator>(max_depth, depth+1));
+                    children_.push_back(generate_random_impl<Val, InputSize, Generator>(max_depth, depth+1));
                 }
                 knot_node.children = children_;
                 return std::make_shared<node<Val>>(knot_node);
             }else{
-                return std::make_shared<node<Val>>(Generator::generate_term());
+                std::bernoulli_distribution has_constant(0.50);
+                if(has_constant(config::random_engine)){
+                    return std::make_shared<node<Val>>(Generator::generate_term());
+                }else{
+                    std::uniform_int_distribution<std::size_t> variable_number(0, InputSize-1);
+                    return std::make_shared<node<Val>>(variable_number(config::random_engine));
+                }
             }
         }
 
     } // namespace impl
 
-    template<class Val, class RandomTermGenerator = random_term::default_random_term<Val>>
+    template<class Val, std::size_t InputSize, class RandomTermGenerator = random_term::default_random_term<Val>>
     inline tree<Val, RandomTermGenerator> generate_random(int const max_depth)
     {
-        return {impl::generate_random_impl<Val, RandomTermGenerator>(max_depth, 0)};
+        return {impl::generate_random_impl<Val, InputSize, RandomTermGenerator>(max_depth, 0)};
     }
 
 
