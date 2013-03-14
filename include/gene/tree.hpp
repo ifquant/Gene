@@ -13,6 +13,7 @@
 #include <random>
 #include <memory>
 #include <cstddef>
+#include <type_traits>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/variant/static_visitor.hpp>
@@ -99,6 +100,50 @@ namespace tree {
             }
         }
 
+
+        struct apply_operator : boost::static_visitor<Val> {
+            std::vector<Val> const& args;
+            apply_operator(std::vector<Val> const& args_) : args(args_) {}
+
+            template<class Operator>
+            typename std::enable_if<Operator::arity==2, Val>::type
+            operator()(Operator) const
+            {
+                if(args.size() != Operator::arity){
+                    throw("apply_operator: invalid number of arguments");
+                }
+                return Operator()(args[0], args[1]);
+            }
+
+            template<class Operator>
+            typename std::enable_if<Operator::arity==1, Val>::type
+            operator()(Operator) const
+            {
+                if(args.size() != Operator::arity){
+                    throw("apply_operator: invalid number of arguments");
+                }
+                return Operator()(args[0]);
+            }
+        };
+
+        template<std::size_t InputSize>
+        Val value_impl(node_ptr_type const node_ptr, std::array<Val, InputSize> const& variable_values)
+        {
+            if(node_ptr->which() == 0){
+                return boost::get<Val>(*node_ptr);
+            }else if(node_ptr->which() == 1){
+                std::vector<Val> args;
+                for(auto const& child : boost::get<knot<Val>>(*node_ptr).children){
+                    args.push_back(value_impl(child, variable_values));
+                }
+                return boost::apply_visitor(apply_operator(args), boost::get<knot<Val>>(*node_ptr).op);
+            }else if(node_ptr->which() == 2){
+                return variable_values[boost::get<Variable>(*node_ptr)];
+            }else{
+                throw("gene::tree::value_impl: invalid node value.");
+            }
+        }
+
     public:
         tree() : root(nullptr), fitness(0.0) {}
         tree(node_ptr_type p) : root(p), fitness(0.0) {}
@@ -111,6 +156,12 @@ namespace tree {
         std::string to_string() const
         {
             return to_string_impl(root, 0);
+        }
+
+        template<std::size_t InputSize>
+        Val value(std::array<Val, InputSize> const& variable_values)
+        {
+            return value_impl(root, variable_values);
         }
     };
 

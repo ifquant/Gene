@@ -14,6 +14,7 @@ namespace gene {
 namespace tree {
 
     typedef std::size_t Variable;
+
     std::string variable_name(Variable v)
     {
         return "x" + std::to_string(v);
