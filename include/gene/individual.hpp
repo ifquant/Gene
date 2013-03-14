@@ -43,7 +43,7 @@ namespace individual {
             std::array<std::string, OutputSize> exprs;
             std::transform(trees.begin(), trees.end(), exprs.begin(),
                     [](tree_type const& tree){
-                        return "[tree] " + tree.to_string();
+                        return "[tree]\n" + tree.to_string();
                     });
             return boost::algorithm::join(exprs, "\n");
         }
@@ -56,6 +56,7 @@ namespace individual {
     {
         std::array<tree::tree<Value, RandomTermGenerator>, OutputSize> trees;
         for(auto &t : trees){
+
             t = tree::generate_random<Value, InputSize, RandomTermGenerator>(config::random_tree_depth);
         }
         return {trees};
