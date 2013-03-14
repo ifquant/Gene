@@ -14,6 +14,7 @@ namespace gene {
 namespace individual {
 
     template< class Value,
+              std::size_t InputSize,
               std::size_t OutputSize,
               class RandomTermGenerator = random_term::default_random_term<Value> >
     class individual{
@@ -50,14 +51,23 @@ namespace individual {
             return boost::algorithm::join(exprs, "\n");
         }
 
-        // std::string calc_fitness() const
+        template<class Result = std::array<Value, OutputSize>>
+        Result value(std::array<Value, InputSize> const& variable_values) const
+        {
+            Result values;
+            std::transform(trees.begin(), trees.end(), values.begin(),
+                    [&](tree_type const& tree){
+                        return tree.value(variable_values);
+                    });
+            return values;
+        }
     };
 
     template< class Value,
               std::size_t InputSize,
               std::size_t OutputSize,
               class RandomTermGenerator = random_term::default_random_term<Value> >
-    inline individual<Value, OutputSize, RandomTermGenerator> generate_random()
+    inline individual<Value, InputSize, OutputSize, RandomTermGenerator> generate_random()
     {
         std::array<tree::tree<Value, RandomTermGenerator>, OutputSize> trees;
         for(auto &t : trees){
