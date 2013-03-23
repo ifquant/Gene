@@ -8,5 +8,6 @@
 #include "gene/random_term.hpp"
 #include "gene/tree.hpp"
 #include "gene/individual.hpp"
+#include "gene/population.hpp"
 
 #endif    // GENE_GENE_HPP_INCLUDED
