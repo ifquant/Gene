@@ -29,7 +29,7 @@ namespace individual {
         Value fitness;
 
     public:
-        individual(trees_type const& trees_) : trees(trees_) {}
+        individual(trees_type const& trees_) : trees(trees_), fitness() {}
 
         std::string expressions() const
         {
@@ -56,8 +56,8 @@ namespace individual {
         {
             Result values;
             std::transform(trees.begin(), trees.end(), values.begin(),
-                    [&](tree_type const& tree){
-                        return tree.value(variable_values);
+                    [&](tree_type t){
+                        return t.value(variable_values);
                     });
             return values;
         }
