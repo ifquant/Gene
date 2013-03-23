@@ -61,6 +61,12 @@ namespace individual {
                     });
             return values;
         }
+
+        // TODO
+        Value calc_fitness()
+        {
+            return 0.0;
+        }
     };
 
     template< class Value,
