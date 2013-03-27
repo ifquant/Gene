@@ -25,6 +25,7 @@ private:
                     std::array<input_type, Input::size>
                > > training_data;
     std::vector<individual_type> individuals;
+    std::size_t generation = 0;
 
 private:
     template<class Tuple, std::size_t... Idx1, std::size_t... Idx2>
@@ -44,6 +45,10 @@ public:
         set_training_data_impl(data, util::idx_range<0, Output::size>(), util::idx_range<Output::size, Output::size+Input::size>());
     }
 
+    std::size_t current_generation() const
+    {
+        return generation;
+    }
 };
 
 } // namespace gene
