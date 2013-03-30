@@ -4,6 +4,7 @@
 #include "config.hpp"
 
 #include <random>
+#include <vector>
 
 namespace gene {
 namespace util {
@@ -31,6 +32,12 @@ namespace util {
     template < std::size_t Start, std::size_t Last, std::size_t Step = 1 >
     using idx_range = typename index_range< Start, Last, Step >::type;
 
+    template<class T>
+    T sample(std::vector<T> const& v)
+    {
+        std::uniform_int_distribution<std::size_t> random_index(0, v.size()-1);
+        return v[random_index(config::random_engine)];
+    }
 } // namespace util
 } // namespace gene
 #endif    // GENE_UTIL_HPP_INCLUDED
