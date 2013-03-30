@@ -126,7 +126,7 @@ namespace tree {
         };
 
         template<std::size_t InputSize>
-        Val value_impl(node_ptr_type const node_ptr, std::array<Val, InputSize> const& variable_values)
+        Val value_impl(node_ptr_type const node_ptr, std::array<Val, InputSize> const& variable_values) const
         {
             if(node_ptr->which() == 0){
                 return boost::get<Val>(*node_ptr);
@@ -140,6 +140,24 @@ namespace tree {
                 return variable_values[boost::get<Variable>(*node_ptr)];
             }else{
                 throw("gene::tree::value_impl: invalid node value.");
+            }
+        }
+
+        std::size_t depth_impl(node_ptr_type const node_ptr) const
+        {
+            auto which = node_ptr->which();
+            if(which == 1){
+                auto const& children = boost::get<knot<Val>>(*node_ptr).children;
+                return std::accumulate(children.begin(), children.end(), 0,
+                                         [this](std::size_t acc, node_ptr_type const& rhs)
+                                         {
+                                            auto depth = this->depth_impl(rhs);
+                                            return acc < depth ? depth : acc;
+                                         }) + 1;
+            }else if(which == 0 || which == 2){
+                return 0;
+            }else{
+                throw("gene::tree::depth_impl: invalid node value.");
             }
         }
 
@@ -158,9 +176,14 @@ namespace tree {
         }
 
         template<std::size_t InputSize>
-        Val value(std::array<Val, InputSize> const& variable_values)
+        Val value(std::array<Val, InputSize> const& variable_values) const
         {
             return value_impl(root, variable_values);
+        }
+
+        std::size_t depth() const
+        {
+            return depth_impl(root);
         }
     };
 
