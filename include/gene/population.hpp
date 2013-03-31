@@ -3,6 +3,7 @@
 
 #include "config.hpp"
 #include "util.hpp"
+#include "random_term.hpp"
 #include "individual.hpp"
 
 #include <cstddef>
@@ -12,17 +13,18 @@
 
 namespace gene {
 
-template< class Output, class Input>
+template< class ValueType,
+          std::size_t InputSize,
+          std::size_t OutputSize,
+          class RandomTermGenerator = random_term::default_random_term<ValueType> >
 class population{
 public:
-    typedef typename Output::value_type output_type;
-    typedef typename Input::value_type input_type;
-    typedef individual::individual<output_type, Output::size, Input::size> individual_type;
+    typedef individual::individual<ValueType, InputSize, OutputSize, RandomTermGenerator> individual_type;
 
 private:
     std::vector< std::pair<
-                    std::array<output_type, Output::size>,
-                    std::array<input_type, Input::size>
+                    std::array<ValueType, InputSize>,
+                    std::array<ValueType, OutputSize>
                > > training_data;
     std::vector<individual_type> individuals;
     std::size_t generation = 0;
@@ -42,7 +44,7 @@ public:
     template<class Tuple>
     void set_training_data(std::vector<Tuple> const& data)
     {
-        set_training_data_impl(data, util::idx_range<0, Output::size>(), util::idx_range<Output::size, Output::size+Input::size>());
+        set_training_data_impl(data, util::idx_range<0, InputSize>(), util::idx_range<InputSize, InputSize+OutputSize>());
     }
 
     std::size_t current_generation() const

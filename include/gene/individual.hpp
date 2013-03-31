@@ -3,6 +3,7 @@
 
 #include "config.hpp"
 #include "tree.hpp"
+#include "random_term.hpp"
 
 #include <array>
 #include <string>
