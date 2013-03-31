@@ -2,6 +2,7 @@
 #define      GENE_TREE_HPP_INCLUDED
 
 #include "config.hpp"
+#include "util.hpp"
 #include "node.hpp"
 #include "operators.hpp"
 #include "random_term.hpp"
@@ -161,6 +162,24 @@ namespace tree {
             }
         }
 
+        node_ptr_type anywhere_impl(node_ptr_type node, std::size_t const depth) const
+        {
+            double const probability_to_decide_here = 1.0 / depth;
+            std::bernoulli_distribution return_here(probability_to_decide_here);
+            if(return_here(config::random_engine)){
+                return node;
+            }else{
+                auto which = node->which();
+                if(which == 1){
+                    return anywhere_impl(util::sample(boost::get<knot<Val>>(*node).children), depth);
+                }else if(which == 0 || which == 2){
+                    return node;
+                }else{
+                    throw("gene::tree::anywhere_impl: invalid node value.");
+                }
+            }
+        }
+
     public:
         tree() : root(nullptr) {}
         tree(node_ptr_type p) : root(p) {}
@@ -185,12 +204,19 @@ namespace tree {
         {
             return depth_impl(root);
         }
+
+        node_ptr_type anywhere() const
+        {
+            return anywhere_impl(root, depth());
+        }
+
+        
     };
 
     namespace impl {
 
         template<class Val, std::size_t InputSize, class Generator>
-        std::shared_ptr<node<Val>> generate_random_impl(std::size_t const max_depth, std::size_t const depth)
+        std::shared_ptr<node<Val>> random_partial_tree(std::size_t const max_depth, std::size_t const depth)
         {
             if(depth==max_depth){
                 return std::make_shared<node<Val>>(Generator::generate_term());
@@ -202,7 +228,7 @@ namespace tree {
                 knot<Val> knot_node(operators::random_op());
                 typename knot<Val>::children_type children_;
                 for(std::size_t i=0; i < knot_node.arity; ++i){
-                    children_.push_back(generate_random_impl<Val, InputSize, Generator>(max_depth, depth+1));
+                    children_.push_back(random_partial_tree<Val, InputSize, Generator>(max_depth, depth+1));
                 }
                 knot_node.children = children_;
                 return std::make_shared<node<Val>>(knot_node);
@@ -222,7 +248,7 @@ namespace tree {
     template<class Val, std::size_t InputSize, class RandomTermGenerator = random_term::default_random_term<Val>>
     inline tree<Val, RandomTermGenerator> generate_random(std::size_t const max_depth)
     {
-        return {impl::generate_random_impl<Val, InputSize, RandomTermGenerator>(max_depth, 0)};
+        return {impl::random_partial_tree<Val, InputSize, RandomTermGenerator>(max_depth, 0)};
     }
 
 
