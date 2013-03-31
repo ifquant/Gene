@@ -44,10 +44,10 @@ namespace tree {
 
         std::string expression_impl(node_ptr_type const node_ptr) const
         {
-            if(node_ptr->which() == 0){
+            if(node_ptr->which() == constant_value){
                 // when node has terminal value
                 return boost::lexical_cast<std::string>(boost::get<Val>(*node_ptr));
-            } else if(node_ptr->which() == 1){
+            } else if(node_ptr->which() == knot_value){
                 // when node has operator
                 auto const& knot_node = boost::get<knot<Val>>(*node_ptr);
                 std::vector<std::string> arg_strs(knot_node.children.size());
@@ -56,7 +56,7 @@ namespace tree {
                             return this->expression_impl(n);
                         });
                 return boost::apply_visitor(operator_to_string(arg_strs), knot_node.op);
-            }else if(node_ptr->which() == 2){
+            }else if(node_ptr->which() == variable_value){
                 // when node has variable terminal
                 return variable_name(boost::get<Variable>(*node_ptr));
             } else {
@@ -79,10 +79,10 @@ namespace tree {
 
         std::string to_string_impl(node_ptr_type const node_ptr, int const level) const
         {
-            if(node_ptr->which() == 0){
+            if(node_ptr->which() == constant_value){
                 return indent(level) + "const: "
                     + boost::lexical_cast<std::string>(boost::get<Val>(*node_ptr)) + '\n';
-            } else if(node_ptr->which() == 1){
+            } else if(node_ptr->which() == knot_value){
                 auto const& knot_node = boost::get<knot<Val>>(*node_ptr);
                 std::string retval = indent(level) + boost::apply_visitor(operator_symbol(), knot_node.op) + ":\n";
                 return std::accumulate( knot_node.children.begin(),
@@ -92,7 +92,7 @@ namespace tree {
                                             return acc + this->to_string_impl(n, level+1) + '\n';
                                         }
                                       );
-            }else if(node_ptr->which() == 2){
+            }else if(node_ptr->which() == variable_value){
                 return indent(level) + "var: "
                     + variable_name(boost::get<Variable>(*node_ptr));
             }else {
@@ -129,15 +129,15 @@ namespace tree {
         template<std::size_t InputSize>
         Val value_impl(node_ptr_type const node_ptr, std::array<Val, InputSize> const& variable_values) const
         {
-            if(node_ptr->which() == 0){
+            if(node_ptr->which() == constant_value){
                 return boost::get<Val>(*node_ptr);
-            }else if(node_ptr->which() == 1){
+            }else if(node_ptr->which() == knot_value){
                 std::vector<Val> args;
                 for(auto const& child : boost::get<knot<Val>>(*node_ptr).children){
                     args.push_back(value_impl(child, variable_values));
                 }
                 return boost::apply_visitor(apply_operator(args), boost::get<knot<Val>>(*node_ptr).op);
-            }else if(node_ptr->which() == 2){
+            }else if(node_ptr->which() == variable_value){
                 return variable_values[boost::get<Variable>(*node_ptr)];
             }else{
                 throw("gene::tree::value_impl: invalid node value.");
@@ -147,7 +147,7 @@ namespace tree {
         std::size_t depth_impl(node_ptr_type const node_ptr) const
         {
             auto which = node_ptr->which();
-            if(which == 1){
+            if(which == knot_value){
                 auto const& children = boost::get<knot<Val>>(*node_ptr).children;
                 return std::accumulate(children.begin(), children.end(), 0,
                                          [this](std::size_t acc, node_ptr_type const& rhs)
@@ -155,7 +155,7 @@ namespace tree {
                                             auto depth = this->depth_impl(rhs);
                                             return acc < depth ? depth : acc;
                                          }) + 1;
-            }else if(which == 0 || which == 2){
+            }else if(which == constant_value || which == variable_value){
                 return 0;
             }else{
                 throw("gene::tree::depth_impl: invalid node value.");
@@ -170,9 +170,9 @@ namespace tree {
                 return node;
             }else{
                 auto which = node->which();
-                if(which == 1){
+                if(which == knot_value){
                     return anywhere_impl(util::sample(boost::get<knot<Val>>(*node).children), depth);
-                }else if(which == 0 || which == 2){
+                }else if(which == constant_value || which == variable_value){
                     return node;
                 }else{
                     throw("gene::tree::anywhere_impl: invalid node value.");
@@ -249,6 +249,14 @@ namespace tree {
     inline tree<Val, RandomTermGenerator> generate_random(std::size_t const max_depth)
     {
         return {impl::random_partial_tree<Val, InputSize, RandomTermGenerator>(max_depth, 0)};
+    }
+
+    template<std::size_t InputSize, class Val, class RandomTermGen>
+    void mutation(tree<Val, RandomTermGen> &t)
+    {
+        auto anywhere_ptr = t.anywhere();
+        auto new_partial_tree = impl::random_partial_tree<Val, InputSize, RandomTermGen>(config::random_tree_depth, 0);
+        *anywhere_ptr = *new_partial_tree;
     }
 
 

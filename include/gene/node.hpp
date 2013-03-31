@@ -26,6 +26,8 @@ namespace tree {
     template<class Val>
     using node = boost::variant<Val, knot<Val>, Variable>;
 
+    enum node_property {constant_value = 0, knot_value, variable_value};
+
     template<class V>
     class knot{
     private:
