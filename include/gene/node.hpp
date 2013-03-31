@@ -46,8 +46,8 @@ namespace tree {
             children_type;
 
     public:
-        operator_type const op;
-        std::size_t const arity;
+        operator_type op;
+        std::size_t arity;
         children_type children;
 
     public:
