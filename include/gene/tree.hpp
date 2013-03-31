@@ -259,6 +259,13 @@ namespace tree {
         *anywhere_ptr = *new_partial_tree;
     }
 
+    template<class Val, class RandomTermGen>
+    void crossover(tree<Val, RandomTermGen> &lhs, tree<Val, RandomTermGen> &rhs)
+    {
+        auto lhs_anywhere = lhs.anywhere();
+        auto rhs_anywhere = rhs.anywhere();
+        lhs_anywhere->swap(*rhs_anywhere);
+    }
 
 } // namespace tree
 
