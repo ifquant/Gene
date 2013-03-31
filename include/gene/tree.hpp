@@ -23,13 +23,13 @@ namespace gene {
 
 namespace tree {
 
-    template<class OutputVal, class RandomTermGenerator = random_term::default_random_term<OutputVal>>
+    template<class ValueType, class RandomTermGenerator = random_term::default_random_term<ValueType>>
     class tree{
     public:
-        typedef std::shared_ptr<node<OutputVal>> node_ptr_type;
+        typedef std::shared_ptr<node<ValueType>> node_ptr_type;
 
     private:
-        std::shared_ptr<node<OutputVal>> root;
+        std::shared_ptr<node<ValueType>> root;
 
     private:
         struct operator_to_string : boost::static_visitor<std::string>{
@@ -46,13 +46,13 @@ namespace tree {
         {
             if(node_ptr->which() == constant_value){
                 // when node has terminal value
-                return boost::lexical_cast<std::string>(boost::get<OutputVal>(*node_ptr));
+                return boost::lexical_cast<std::string>(boost::get<ValueType>(*node_ptr));
             } else if(node_ptr->which() == knot_value){
                 // when node has operator
-                auto const& knot_node = boost::get<knot<OutputVal>>(*node_ptr);
+                auto const& knot_node = boost::get<knot<ValueType>>(*node_ptr);
                 std::vector<std::string> arg_strs(knot_node.children.size());
                 std::transform(knot_node.children.begin(), knot_node.children.end(), arg_strs.begin(),
-                        [&](std::shared_ptr<node<OutputVal>> n) {
+                        [&](std::shared_ptr<node<ValueType>> n) {
                             return this->expression_impl(n);
                         });
                 return boost::apply_visitor(operator_to_string(arg_strs), knot_node.op);
@@ -81,14 +81,14 @@ namespace tree {
         {
             if(node_ptr->which() == constant_value){
                 return indent(level) + "const: "
-                    + boost::lexical_cast<std::string>(boost::get<OutputVal>(*node_ptr)) + '\n';
+                    + boost::lexical_cast<std::string>(boost::get<ValueType>(*node_ptr)) + '\n';
             } else if(node_ptr->which() == knot_value){
-                auto const& knot_node = boost::get<knot<OutputVal>>(*node_ptr);
+                auto const& knot_node = boost::get<knot<ValueType>>(*node_ptr);
                 std::string retval = indent(level) + boost::apply_visitor(operator_symbol(), knot_node.op) + ":\n";
                 return std::accumulate( knot_node.children.begin(),
                                         knot_node.children.end(),
                                         retval,
-                                        [&](std::string acc, std::shared_ptr<node<OutputVal>> n) {
+                                        [&](std::string acc, std::shared_ptr<node<ValueType>> n) {
                                             return acc + this->to_string_impl(n, level+1) + '\n';
                                         }
                                       );
@@ -101,12 +101,12 @@ namespace tree {
         }
 
 
-        struct apply_operator : boost::static_visitor<OutputVal> {
-            std::vector<OutputVal> const& args;
-            apply_operator(std::vector<OutputVal> const& args_) : args(args_) {}
+        struct apply_operator : boost::static_visitor<ValueType> {
+            std::vector<ValueType> const& args;
+            apply_operator(std::vector<ValueType> const& args_) : args(args_) {}
 
             template<class Operator>
-            typename std::enable_if<Operator::arity==2, OutputVal>::type
+            typename std::enable_if<Operator::arity==2, ValueType>::type
             operator()(Operator) const
             {
                 if(args.size() != Operator::arity){
@@ -116,7 +116,7 @@ namespace tree {
             }
 
             template<class Operator>
-            typename std::enable_if<Operator::arity==1, OutputVal>::type
+            typename std::enable_if<Operator::arity==1, ValueType>::type
             operator()(Operator) const
             {
                 if(args.size() != Operator::arity){
@@ -127,16 +127,16 @@ namespace tree {
         };
 
         template<std::size_t InputSize>
-        OutputVal value_impl(node_ptr_type const node_ptr, std::array<OutputVal, InputSize> const& variable_values) const
+        ValueType value_impl(node_ptr_type const node_ptr, std::array<ValueType, InputSize> const& variable_values) const
         {
             if(node_ptr->which() == constant_value){
-                return boost::get<OutputVal>(*node_ptr);
+                return boost::get<ValueType>(*node_ptr);
             }else if(node_ptr->which() == knot_value){
-                std::vector<OutputVal> args;
-                for(auto const& child : boost::get<knot<OutputVal>>(*node_ptr).children){
+                std::vector<ValueType> args;
+                for(auto const& child : boost::get<knot<ValueType>>(*node_ptr).children){
                     args.push_back(value_impl(child, variable_values));
                 }
-                return boost::apply_visitor(apply_operator(args), boost::get<knot<OutputVal>>(*node_ptr).op);
+                return boost::apply_visitor(apply_operator(args), boost::get<knot<ValueType>>(*node_ptr).op);
             }else if(node_ptr->which() == variable_value){
                 return variable_values[boost::get<Variable>(*node_ptr)];
             }else{
@@ -148,7 +148,7 @@ namespace tree {
         {
             auto which = node_ptr->which();
             if(which == knot_value){
-                auto const& children = boost::get<knot<OutputVal>>(*node_ptr).children;
+                auto const& children = boost::get<knot<ValueType>>(*node_ptr).children;
                 return std::accumulate(children.begin(), children.end(), 0,
                                          [this](std::size_t acc, node_ptr_type const& rhs)
                                          {
@@ -171,7 +171,7 @@ namespace tree {
             }else{
                 auto which = node->which();
                 if(which == knot_value){
-                    return anywhere_impl(util::sample(boost::get<knot<OutputVal>>(*node).children), depth);
+                    return anywhere_impl(util::sample(boost::get<knot<ValueType>>(*node).children), depth);
                 }else if(which == constant_value || which == variable_value){
                     return node;
                 }else{
@@ -195,7 +195,7 @@ namespace tree {
         }
 
         template<std::size_t InputSize>
-        OutputVal value(std::array<OutputVal, InputSize> const& variable_values) const
+        ValueType value(std::array<ValueType, InputSize> const& variable_values) const
         {
             return value_impl(root, variable_values);
         }
@@ -215,52 +215,52 @@ namespace tree {
 
     namespace impl {
 
-        template<class OutputVal, std::size_t InputSize, class Generator>
-        std::shared_ptr<node<OutputVal>> random_partial_tree(std::size_t const max_depth, std::size_t const depth)
+        template<class ValueType, std::size_t InputSize, class Generator>
+        std::shared_ptr<node<ValueType>> random_partial_tree(std::size_t const max_depth, std::size_t const depth)
         {
             if(depth==max_depth){
-                return std::make_shared<node<OutputVal>>(Generator::generate_term());
+                return std::make_shared<node<ValueType>>(Generator::generate_term());
             }
 
             double const probability_to_make_operator = (max_depth - 1.0) / max_depth;
             std::bernoulli_distribution has_operator(probability_to_make_operator);
             if(has_operator(config::random_engine)){
-                knot<OutputVal> knot_node(operators::random_op());
-                typename knot<OutputVal>::children_type children_;
+                knot<ValueType> knot_node(operators::random_op());
+                typename knot<ValueType>::children_type children_;
                 for(std::size_t i=0; i < knot_node.arity; ++i){
-                    children_.push_back(random_partial_tree<OutputVal, InputSize, Generator>(max_depth, depth+1));
+                    children_.push_back(random_partial_tree<ValueType, InputSize, Generator>(max_depth, depth+1));
                 }
                 knot_node.children = children_;
-                return std::make_shared<node<OutputVal>>(knot_node);
+                return std::make_shared<node<ValueType>>(knot_node);
             }else{
                 std::bernoulli_distribution has_constant(0.50);
                 if(has_constant(config::random_engine)){
-                    return std::make_shared<node<OutputVal>>(Generator::generate_term());
+                    return std::make_shared<node<ValueType>>(Generator::generate_term());
                 }else{
                     std::uniform_int_distribution<std::size_t> variable_number(0, InputSize-1);
-                    return std::make_shared<node<OutputVal>>(variable_number(config::random_engine));
+                    return std::make_shared<node<ValueType>>(variable_number(config::random_engine));
                 }
             }
         }
 
     } // namespace impl
 
-    template<class OutputVal, std::size_t InputSize, class RandomTermGenerator = random_term::default_random_term<OutputVal>>
-    inline tree<OutputVal, RandomTermGenerator> generate_random(std::size_t const max_depth)
+    template<class ValueType, std::size_t InputSize, class RandomTermGenerator = random_term::default_random_term<ValueType>>
+    inline tree<ValueType, RandomTermGenerator> generate_random(std::size_t const max_depth)
     {
-        return {impl::random_partial_tree<OutputVal, InputSize, RandomTermGenerator>(max_depth, 0)};
+        return {impl::random_partial_tree<ValueType, InputSize, RandomTermGenerator>(max_depth, 0)};
     }
 
-    template<std::size_t InputSize, class OutputVal, class RandomTermGen>
-    void mutation(tree<OutputVal, RandomTermGen> &t)
+    template<std::size_t InputSize, class ValueType, class RandomTermGen>
+    void mutation(tree<ValueType, RandomTermGen> &t)
     {
         auto anywhere_ptr = t.anywhere();
-        auto new_partial_tree = impl::random_partial_tree<OutputVal, InputSize, RandomTermGen>(config::random_tree_depth, 0);
+        auto new_partial_tree = impl::random_partial_tree<ValueType, InputSize, RandomTermGen>(config::random_tree_depth, 0);
         *anywhere_ptr = *new_partial_tree;
     }
 
-    template<class OutputVal, class RandomTermGen>
-    void crossover(tree<OutputVal, RandomTermGen> &lhs, tree<OutputVal, RandomTermGen> &rhs)
+    template<class ValueType, class RandomTermGen>
+    void crossover(tree<ValueType, RandomTermGen> &lhs, tree<ValueType, RandomTermGen> &rhs)
     {
         auto lhs_anywhere = lhs.anywhere();
         auto rhs_anywhere = rhs.anywhere();
