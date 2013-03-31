@@ -13,10 +13,10 @@
 namespace gene {
 namespace individual {
 
-    template< class Value,
+    template< class OutputType,
               std::size_t InputSize,
               std::size_t OutputSize,
-              class RandomTermGenerator = random_term::default_random_term<Value> >
+              class RandomTermGenerator = random_term::default_random_term<OutputType> >
     class individual{
 
         template< class V, std::size_t In, std::size_t Out, class Rand>
@@ -24,14 +24,14 @@ namespace individual {
 
 
     public:
-        typedef tree::tree<Value, RandomTermGenerator> tree_type;
+        typedef tree::tree<OutputType, RandomTermGenerator> tree_type;
         typedef std::array<tree_type, OutputSize> trees_type;
 
     private:
         trees_type trees;
 
     public:
-        Value fitness;
+        OutputType fitness;
 
     public:
         individual(trees_type const& trees_) : trees(trees_), fitness() {}
@@ -39,7 +39,7 @@ namespace individual {
         {
             for(auto &t : trees)
             {
-                t = tree::generate_random<Value, InputSize, RandomTermGenerator>(config::random_tree_depth);
+                t = tree::generate_random<OutputType, InputSize, RandomTermGenerator>(config::random_tree_depth);
             }
         }
 
@@ -63,8 +63,8 @@ namespace individual {
             return boost::algorithm::join(exprs, "\n");
         }
 
-        template<class Result = std::array<Value, OutputSize>>
-        Result value(std::array<Value, InputSize> const& variable_values) const
+        template<class Result = std::array<OutputType, OutputSize>>
+        Result value(std::array<OutputType, InputSize> const& variable_values) const
         {
             Result values;
             std::transform(trees.begin(), trees.end(), values.begin(),
@@ -75,34 +75,34 @@ namespace individual {
         }
 
         // TODO
-        Value calc_fitness()
+        OutputType calc_fitness()
         {
             return 0.0;
         }
     };
 
-    template< class Value,
+    template< class OutputType,
               std::size_t InputSize,
               std::size_t OutputSize,
-              class RandomTermGenerator = random_term::default_random_term<Value> >
-    inline individual<Value, InputSize, OutputSize, RandomTermGenerator> generate_random()
+              class RandomTermGenerator = random_term::default_random_term<OutputType> >
+    inline individual<OutputType, InputSize, OutputSize, RandomTermGenerator> generate_random()
     {
-        std::array<tree::tree<Value, RandomTermGenerator>, OutputSize> trees;
+        std::array<tree::tree<OutputType, RandomTermGenerator>, OutputSize> trees;
         for(auto &t : trees){
 
-            t = tree::generate_random<Value, InputSize, RandomTermGenerator>(config::random_tree_depth);
+            t = tree::generate_random<OutputType, InputSize, RandomTermGenerator>(config::random_tree_depth);
         }
         return {trees};
     }
 
-    template< class Value,
+    template< class OutputType,
               std::size_t InputSize,
               std::size_t OutputSize,
               class RandomTermGenerator >
-    void mutation(individual<Value, InputSize, OutputSize, RandomTermGenerator> ind)
+    void mutation(individual<OutputType, InputSize, OutputSize, RandomTermGenerator> ind)
     {
         for( auto &t : ind.trees ){
-            tree::mutation(t);
+            tree::mutation<InputSize>(t);
         }
     }
 
