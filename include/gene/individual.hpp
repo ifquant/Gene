@@ -18,6 +18,11 @@ namespace individual {
               std::size_t OutputSize,
               class RandomTermGenerator = random_term::default_random_term<Value> >
     class individual{
+
+        template< class V, std::size_t In, std::size_t Out, class Rand>
+        friend void mutation(individual<V, In, Out, Rand> ind);
+
+
     public:
         typedef tree::tree<Value, RandomTermGenerator> tree_type;
         typedef std::array<tree_type, OutputSize> trees_type;
@@ -30,6 +35,13 @@ namespace individual {
 
     public:
         individual(trees_type const& trees_) : trees(trees_), fitness() {}
+        individual() : fitness()
+        {
+            for(auto &t : trees)
+            {
+                t = tree::generate_random<Value, InputSize, RandomTermGenerator>(config::random_tree_depth);
+            }
+        }
 
         std::string expressions() const
         {
@@ -81,6 +93,17 @@ namespace individual {
             t = tree::generate_random<Value, InputSize, RandomTermGenerator>(config::random_tree_depth);
         }
         return {trees};
+    }
+
+    template< class Value,
+              std::size_t InputSize,
+              std::size_t OutputSize,
+              class RandomTermGenerator >
+    void mutation(individual<Value, InputSize, OutputSize, RandomTermGenerator> ind)
+    {
+        for( auto &t : ind.trees ){
+            tree::mutation(t);
+        }
     }
 
 } // namespace individual
