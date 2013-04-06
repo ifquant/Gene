@@ -21,8 +21,11 @@ namespace individual {
     class individual{
 
         template< class V, std::size_t In, std::size_t Out, class Rand>
-        friend void mutation(individual<V, In, Out, Rand> ind);
+        friend void mutation(individual<V, In, Out, Rand> &ind);
 
+        template< class V, std::size_t In, std::size_t VSize, class Rand >
+        friend void crossover(individual<V, In, VSize, Rand> &lhs,
+                              individual<V, In, VSize, Rand> &rhs);
 
     public:
         typedef tree::tree<ValueType, RandomTermGenerator> tree_type;
@@ -100,10 +103,24 @@ namespace individual {
               std::size_t InputSize,
               std::size_t ValueSize,
               class RandomTermGenerator >
-    void mutation(individual<ValueType, InputSize, ValueSize, RandomTermGenerator> ind)
+    void mutation(individual<ValueType, InputSize, ValueSize, RandomTermGenerator> &ind)
     {
         for( auto &t : ind.trees ){
             tree::mutation<InputSize>(t);
+        }
+    }
+
+    template< class ValueType,
+              std::size_t InputSize,
+              std::size_t ValueSize,
+              class RandomTermGenerator >
+    void crossover(individual<ValueType, InputSize, ValueSize, RandomTermGenerator> &lhs,
+                   individual<ValueType, InputSize, ValueSize, RandomTermGenerator> &rhs)
+    {
+        for(auto li = lhs.trees.begin(), ri = rhs.trees.begin();
+            li == lhs.trees.end() || ri == rhs.trees.end();
+            ++li, ++ri){
+            tree::crossover(*li, *ri);
         }
     }
 
